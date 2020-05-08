@@ -8,13 +8,25 @@ import com.amazonaws.services.sqs.AmazonSQSClient;
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
+import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class Play {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
+        Map<String,String> map = new HashMap<>();
+        map.put("a","A");
+        map.put("b","B");
+        l(map);
+        Gson gson = new Gson();
+        l(gson.toJson(map));
+        l(gson.fromJson(gson.toJson(map),Map.class));
+    }
+    public static void main1(String[] args) {
         l("Arrancan");
         AmazonSNS sns = new AmazonSNSClient();
         AmazonSQS sqs = new AmazonSQSClient();

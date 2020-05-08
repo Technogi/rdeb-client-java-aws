@@ -16,8 +16,11 @@ import com.amazonaws.services.sqs.AmazonSQSAsync;
 import com.amazonaws.services.sqs.AmazonSQSAsyncClient;
 import com.amazonaws.services.sqs.AmazonSQSClient;
 import com.amazonaws.services.sqs.model.CreateQueueRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.gson.Gson;
 import com.technogi.rdeb.client.exceptions.RdebNotConfiguredException;
 import com.technogi.rdeb.client.exceptions.RdebNotConnectedException;
+import com.technogi.rdeb.client.exceptions.RdepBroadcastException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +37,7 @@ public class RdebClientAwsImpl implements RdebClient {
     private static final String BROADCASTS_TOPIC_ARN = "broadcastsTopic.arn";
     private static final String DEFAULT_QUEUE_PREFIX = "rdeb-queues-";
 
-    private Map<String, List<EventHandler>> eventHandlersMap = Collections.synchronizedMap(new HashMap< >());
+    private Map<String, List<EventHandler>> eventHandlersMap = Collections.synchronizedMap(new HashMap<>());
     private AmazonSNSAsync sns = null;
     private AmazonSQSAsync sqs = null;
     private boolean connected = false;
@@ -43,6 +46,7 @@ public class RdebClientAwsImpl implements RdebClient {
     private String topicArn;
     private String broadcastsTopicArn;
     private int initialDelay = 2;
+    private Gson gson = new Gson();
 
     @Override
     public void connect(Config config) {
@@ -83,9 +87,9 @@ public class RdebClientAwsImpl implements RdebClient {
     public void start() {
         if (!connected) throw new RdebNotConnectedException();
         if (executor == null) executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleWithFixedDelay(()->{
+        executor.scheduleWithFixedDelay(() -> {
 
-        },initialDelay, config.getPollingTime(), TimeUnit.SECONDS);
+        }, initialDelay, config.getPollingTime(), TimeUnit.SECONDS);
     }
 
     @Override
@@ -102,8 +106,9 @@ public class RdebClientAwsImpl implements RdebClient {
     public void broadcast(Event event) {
         assert connected;
         log.debug("Broadcasting event {}", event);
-        if (event != null && event.getType() != null)
-          sns.publish(new PublishRequest(broadcastsTopicArn, event.getProps().toString(),event.getType()));
+        if (event != null && event.getType() != null) {
+            sns.publish(new PublishRequest(broadcastsTopicArn, gson.toJson(event.getProps()), event.getType()));
+        }
     }
 
     @Override
