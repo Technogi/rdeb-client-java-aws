@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+}
+
+group 'com.technogi.rdeb'
+version '0.3.1'
+
+def awsVersion = '1.9.3'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+    jcenter()
+}
+
+dependencies {
+    implementation "com.github.Technogi:rdeb-client-java:${version}"
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-sns', version: awsVersion
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: awsVersion
+    implementation "org.slf4j:slf4j-api:1.7.25"
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
